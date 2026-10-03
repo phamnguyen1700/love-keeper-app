@@ -1,0 +1,2 @@
+import type { ReactNode } from "react"
+export function EmptyState({ icon, title, description, action }: { icon?: ReactNode; title: string; description?: string; action?: ReactNode }) { return <div className="lk-empty-state">{icon ? <div className="lk-empty-state__icon" aria-hidden="true">{icon}</div> : null}<h2 className="lk-heading-3">{title}</h2>{description ? <p className="lk-body-sm lk-text-muted">{description}</p> : null}{action}</div> }
