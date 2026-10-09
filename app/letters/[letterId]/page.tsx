@@ -2,8 +2,17 @@
 
 import Link from "next/link"
 import { useEffect, useState } from "react"
-import { ArrowLeft, Play, Settings2, Sparkles } from "lucide-react"
-import { MemoryStage, defaults, exampleMemories } from "@/app/page"
+import { ArrowLeft, Play, Sparkles } from "lucide-react"
+import { MemoryStage, exampleMemories, defaults } from "@/app/page"
+import type { Letter } from "@/app/page"
 
-type Letter = { id: string; title: string; date: string; recipientName: string; recipientEmail: string; senderName: string; content: string; memories: { id: string; type: "image" | "video"; src: string; name: string }[]; settings: typeof defaults }
-export default function LetterPage({ params }: { params: Promise<{ letterId: string }> }) { const [letter, setLetter] = useState<Letter | null>(null); const [started, setStarted] = useState(false); const [missing, setMissing] = useState(false); useEffect(() => { params.then(({ letterId }) => { const raw = localStorage.getItem(`love-keeper-${letterId}`); if (raw) setLetter(JSON.parse(raw)); else setMissing(true) }) }, [params]); if (missing) return <main className="lk-entry"><Sparkles size={24} /><p className="lk-eyebrow">Love Keeper</p><h1>This letter has gone quiet.</h1><p>It may only be available in the browser where it was created.</p><Link className="lk-button primary" href="/">Create a new letter</Link></main>; if (!letter) return <main className="lk-entry"><span className="lk-loading">Loading your memory...</span></main>; if (!started) return <main className="lk-entry"><span className="lk-entry-mark"><Sparkles size={18} /></span><p className="lk-eyebrow">A letter for {letter.recipientName}</p><h1>{letter.title}</h1><p>From {letter.senderName}. Take a quiet moment before you begin.</p><button className="lk-button primary" onClick={() => setStarted(true)}>Read letter <Play size={15} fill="currentColor" /></button><Link className="lk-back" href="/">Love Keeper · demo link</Link></main>; return <main className="lk-full-reader"><MemoryStage letter={{ ...letter, memories: letter.memories.length ? letter.memories : exampleMemories }} autoPlay /><Link className="lk-reader-back" href="/" aria-label="Back to Love Keeper"><ArrowLeft size={17} /> Exit</Link><div className="lk-reader-title"><Sparkles size={14} /> {letter.title}</div><button className="lk-reader-settings" aria-label="Settings"><Settings2 size={17} /></button></main> }
+export default function LetterPage({ params }: { params: Promise<{ letterId: string }> }) {
+  const [letter, setLetter] = useState<Letter | null>(null)
+  const [missing, setMissing] = useState(false)
+  const [started, setStarted] = useState(false)
+  useEffect(() => { params.then(({ letterId }) => { const raw = localStorage.getItem(`love-keeper-${letterId}`); if (!raw) setMissing(true); else try { setLetter(JSON.parse(raw)) } catch { setMissing(true) } }) }, [params])
+  if (missing) return <main className="lk-entry"><Sparkles size={24} /><p className="lk-eyebrow">Love Keeper</p><h1>This letter has gone quiet.</h1><p>It may only be available in the browser where it was created.</p><Link className="lk-button primary" href="/">Create a new letter</Link></main>
+  if (!letter) return <main className="lk-entry"><span className="lk-loading">Loading your memory…</span></main>
+  if (!started) return <main className="lk-entry"><span className="lk-entry-mark"><Sparkles size={18} /></span><p className="lk-eyebrow">A letter for {letter.recipientName}</p><h1>{letter.title}</h1><p>From {letter.senderName}. Take a quiet moment before you begin.</p><button className="lk-button primary" onClick={() => setStarted(true)}>Read letter <Play size={15} fill="currentColor" /></button><Link className="lk-back" href="/">Love Keeper · demo link</Link></main>
+  return <main className="lk-full-reader"><MemoryStage letter={{ ...letter, settings: letter.settings ?? defaults, memories: letter.memories?.length ? letter.memories : exampleMemories }} autoPlay /><Link className="lk-reader-back" href="/" aria-label="Back to Love Keeper"><ArrowLeft size={17} /> Exit</Link><div className="lk-reader-title"><Sparkles size={14} /> {letter.title}</div></main>
+}
